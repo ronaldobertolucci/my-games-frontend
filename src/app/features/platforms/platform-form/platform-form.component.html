@@ -1,0 +1,31 @@
+<div class="form-container">
+  <h3>{{ isEditMode ? 'Editar Plataforma' : 'Nova Plataforma' }}</h3>
+  
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Nome da Plataforma *</label>
+      <input 
+        type="text" 
+        id="name"
+        class="form-input"
+        [(ngModel)]="formData.name"
+        name="name"
+        placeholder="Ex: PlayStation 5"
+        required>
+    </div>
+
+    <!-- Adicione a mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode ? 'Atualizar' : 'Criar' }}
+      </button>
+    </div>
+  </form>
+</div>

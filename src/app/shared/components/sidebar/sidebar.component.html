@@ -1,0 +1,24 @@
+<aside class="sidebar">
+    <div class="logo">Meus Jogos</div>
+
+    <div class="menu-section">
+        <div class="menu-title">Principal</div>
+        <div class="menu-item active">📊 Dashboard</div>
+        <div class="menu-item">🎮 Meus Jogos</div>
+    </div>
+
+    <div class="menu-section">
+        <div class="menu-title">Catálogo</div>
+        <div class="menu-item">🕹️ Jogos</div>
+        <div class="menu-item">🏢 Empresas</div>
+        <div class="menu-item" routerLink="/platforms" routerLinkActive="active">⚙️ Plataformas</div>
+        <div class="menu-item">🔍 Origem</div>
+        <div class="menu-item">🏷️ Gêneros</div>
+        <div class="menu-item">🔖 Temas</div>
+    </div>
+
+    <div class="menu-section">
+        <div class="menu-title">Conta</div>
+        <div class="menu-item" (click)="logout()">🚪 Sair</div>
+    </div>
+</aside>

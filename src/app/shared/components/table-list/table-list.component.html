@@ -1,0 +1,59 @@
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th *ngFor="let column of columns">{{ column.header }}</th>
+        <th *ngIf="actions.length > 0">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of data" (click)="onRowClick(item)">
+        <td *ngFor="let column of columns">
+          <ng-container [ngSwitch]="column.type">
+            <!-- Tipo: icon-detail -->
+            <div *ngSwitchCase="'icon-detail'" class="game-cell">
+              <div class="game-icon">{{ item[column.iconKey || 'icon'] }}</div>
+              <div class="game-details">
+                <div class="game-name">{{ item[column.titleKey || 'name'] }}</div>
+                <div class="game-company" *ngIf="column.subtitleKey && item[column.subtitleKey]">
+                  {{ item[column.subtitleKey] }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Tipo: badge -->
+            <span *ngSwitchCase="'badge'" 
+                  class="badge" 
+                  [ngClass]="column.badgeClass">
+              {{ getCellValue(item, column) }}
+            </span>
+
+            <!-- Tipo: status -->
+            <span *ngSwitchCase="'status'" 
+                  class="game-status" 
+                  [ngClass]="getStatusClass(getCellValue(item, column))">
+              {{ getCellValue(item, column) }}
+            </span>
+
+            <!-- Tipo: text (padrão) -->
+            <span *ngSwitchDefault>
+              {{ getCellValue(item, column) }}
+            </span>
+          </ng-container>
+        </td>
+
+        <!-- Ações -->
+        <td *ngIf="actions.length > 0">
+          <div class="actions">
+            <button *ngFor="let action of actions" 
+                    class="btn-icon" 
+                    [title]="action.label"
+                    (click)="onActionClick(action, item, $event)">
+              {{ action.icon }}
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

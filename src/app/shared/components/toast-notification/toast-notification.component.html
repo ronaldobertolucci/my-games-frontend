@@ -1,0 +1,7 @@
+<div class="toast-container" *ngIf="show">
+  <div class="toast" [ngClass]="'toast-' + type">
+    <div class="toast-icon">{{ getIcon() }}</div>
+    <div class="toast-message">{{ message }}</div>
+    <button class="toast-close" (click)="close()">×</button>
+  </div>
+</div>

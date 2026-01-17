@@ -1,0 +1,69 @@
+<div class="register-container">
+  <div class="register-box">
+    <div class="register-header">
+      <div class="logo">🎮 Meus Jogos</div>
+      <h2>Criar Conta</h2>
+      <p>Cadastre-se para gerenciar seus jogos</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Nome de Usuário *</label>
+        <input 
+          type="text" 
+          id="username"
+          class="form-input"
+          [(ngModel)]="registerData.username"
+          name="username"
+          placeholder="Digite seu nome de usuário"
+          [disabled]="isLoading"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha *</label>
+        <input 
+          type="password" 
+          id="password"
+          class="form-input"
+          [(ngModel)]="registerData.password"
+          name="password"
+          placeholder="Digite sua senha (mín. 6 caracteres)"
+          [disabled]="isLoading"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Senha *</label>
+        <input 
+          type="password" 
+          id="confirmPassword"
+          class="form-input"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          placeholder="Confirme sua senha"
+          [disabled]="isLoading"
+          required>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="success-message" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-register"
+        [disabled]="isLoading">
+        {{ isLoading ? 'Cadastrando...' : 'Criar Conta' }}
+      </button>
+    </form>
+
+    <div class="login-link">
+      Já tem uma conta? <a routerLink="/login">Faça login</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="logo">🎮 Meus Jogos</div>
+      <h2>Entrar</h2>
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input 
+          type="text" 
+          id="username"
+          class="form-input"
+          [(ngModel)]="credentials.username"
+          name="username"
+          placeholder="Digite seu usuário"
+          [disabled]="isLoading"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input 
+          type="password" 
+          id="password"
+          class="form-input"
+          [(ngModel)]="credentials.password"
+          name="password"
+          placeholder="Digite sua senha"
+          [disabled]="isLoading"
+          required>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-login"
+        [disabled]="isLoading">
+        {{ isLoading ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <div class="register-link">
+      Não tem uma conta? <a routerLink="/register">Cadastre-se</a>
+    </div>
+  </div>
+</div>
