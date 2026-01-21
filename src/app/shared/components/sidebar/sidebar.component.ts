@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
-import { ConfirmService } from '../../../core/services/confirm.service';
 
 
 @Component({
@@ -14,7 +13,6 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 })
 export class SidebarComponent {
   private authService = inject(AuthService);
-  private confirmService = inject(ConfirmService);
 
   username$ = this.authService.currentUser$;
 
