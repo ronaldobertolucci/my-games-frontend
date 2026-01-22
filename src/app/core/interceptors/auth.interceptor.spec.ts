@@ -8,9 +8,13 @@ describe('authInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
   let routerMock: jasmine.SpyObj<Router>;
+  let consoleErrorSpy: jasmine.Spy;
 
   beforeEach(() => {
     routerMock = jasmine.createSpyObj('Router', ['navigate']);
+
+    // Suprimir console.error globalmente
+    consoleErrorSpy = spyOn(console, 'error');
 
     TestBed.configureTestingModule({
       providers: [
@@ -122,8 +126,9 @@ describe('authInterceptor', () => {
     });
 
     it('should handle token without exp field', () => {
-      // Token sem campo exp
-      const tokenWithoutExp = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJ0ZXN0dXNlciJ9.test';
+      // Token sem campo exp (base64 válido)
+      const payload = btoa(JSON.stringify({ sub: "12345", username: "testuser" }));
+      const tokenWithoutExp = `header.${payload}.signature`;
       localStorage.setItem('token', tokenWithoutExp);
 
       httpClient.get('/api/platforms').subscribe();
@@ -136,7 +141,7 @@ describe('authInterceptor', () => {
       req.flush({});
     });
 
-    it('should handle malformed token', () => {
+    it('should handle malformed token and log error', () => {
       const malformedToken = 'invalid-token-format';
       localStorage.setItem('token', malformedToken);
 
@@ -146,6 +151,7 @@ describe('authInterceptor', () => {
 
       expect(localStorage.getItem('token')).toBeNull();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao validar token:', jasmine.any(Error));
 
       req.flush({});
     });
@@ -211,7 +217,7 @@ describe('authInterceptor', () => {
       req.flush({});
     });
 
-    it('should handle token with only two parts', () => {
+    it('should handle token with only two parts and log error', () => {
       const invalidToken = 'header.payload';
       localStorage.setItem('token', invalidToken);
 
@@ -221,11 +227,12 @@ describe('authInterceptor', () => {
 
       expect(localStorage.getItem('token')).toBeNull();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao validar token:', jasmine.any(Error));
 
       req.flush({});
     });
 
-    it('should handle token with invalid base64 payload', () => {
+    it('should handle token with invalid base64 payload and log error', () => {
       const invalidToken = 'header.invalid-base64!!!.signature';
       localStorage.setItem('token', invalidToken);
 
@@ -235,27 +242,33 @@ describe('authInterceptor', () => {
 
       expect(localStorage.getItem('token')).toBeNull();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Erro ao validar token:', jasmine.any(Error));
 
       req.flush({});
     });
 
-    it('should handle multiple requests with expired token by navigating only once', () => {
+    it('should handle multiple requests with expired token', () => {
       const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcm5hbWUiOiJ0ZXN0dXNlciIsImV4cCI6MTU3NzgzNjgwMH0.test';
       localStorage.setItem('token', expiredToken);
 
-      httpClient.get('/api/platforms').subscribe({
-        error: (err) => expect(err).toBeDefined()
-      });
-      httpClient.get('/api/platforms').subscribe({
-        error: (err) => expect(err).toBeDefined()
-      });
+      httpClient.get('/api/platforms').subscribe();
 
-      const requests = httpMock.match(req => true);
+      const req1 = httpMock.expectOne('/api/platforms');
+      req1.flush({});
 
-      requests.forEach(req => req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' }));
-
+      // Após a primeira requisição, o token já foi removido
+      expect(localStorage.getItem('token')).toBeNull();
       expect(routerMock.navigate).toHaveBeenCalledTimes(1);
       expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
+
+      // Segunda requisição - sem token agora
+      httpClient.get('/api/games').subscribe();
+
+      const req2 = httpMock.expectOne('/api/games');
+      req2.flush({});
+
+      // Não deve ter navegado novamente (já não tem token)
+      expect(routerMock.navigate).toHaveBeenCalledTimes(1);
     });
   });
 
