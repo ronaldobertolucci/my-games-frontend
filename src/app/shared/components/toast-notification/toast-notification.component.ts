@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, input, model, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -11,33 +11,48 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info';
   styleUrls: ['./toast-notification.component.css']
 })
 export class ToastNotificationComponent implements OnInit {
-  @Input() message: string = '';
-  @Input() type: ToastType = 'success';
-  @Input() duration: number = 3000; // 3 segundos
-  @Input() show: boolean = false;
-  @Output() showChange = new EventEmitter<boolean>();
+  // Inputs usando signals
+  message = input<string>('');
+  type = input<ToastType>('success');
+  duration = input<number>(3000);
+  
+  // Two-way binding usando model()
+  show = model<boolean>(false);
 
-  ngOnInit(): void {
-    if (this.show) {
-      this.autoClose();
-    }
+  private timeoutId?: number;
+
+  constructor() {
+    // Effect para observar mudanças em show
+    effect(() => {
+      if (this.show()) {
+        this.autoClose();
+      }
+    });
   }
 
-  ngOnChanges(): void {
-    if (this.show) {
+  ngOnInit(): void {
+    if (this.show()) {
       this.autoClose();
     }
   }
 
   close(): void {
-    this.show = false;
-    this.showChange.emit(false);
+    // Limpa timeout anterior se existir
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+    this.show.set(false);
   }
 
   private autoClose(): void {
-    setTimeout(() => {
+    // Limpa timeout anterior se existir
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+
+    this.timeoutId = window.setTimeout(() => {
       this.close();
-    }, this.duration);
+    }, this.duration());
   }
 
   getIcon(): string {
@@ -47,6 +62,6 @@ export class ToastNotificationComponent implements OnInit {
       warning: '⚠',
       info: 'ℹ'
     };
-    return icons[this.type];
+    return icons[this.type()];
   }
 }
