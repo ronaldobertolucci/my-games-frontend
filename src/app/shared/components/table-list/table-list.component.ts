@@ -1,11 +1,11 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface TableColumn {
   key: string;
   header: string;
-  type?: 'text' | 'badge' | 'status' | 'icon-detail';
-  badgeClass?: string;
+  type?: 'text' | 'badge' | 'icon-detail' | 'custom';
+  cssClass?: string; // Classe CSS dinâmica para badges, status, etc.
   iconKey?: string;
   titleKey?: string;
   subtitleKey?: string;
@@ -25,12 +25,14 @@ export interface TableAction {
   styleUrls: ['./table-list.component.css']
 })
 export class TableListComponent {
-  @Input() columns: TableColumn[] = [];
-  @Input() data: any[] = [];
-  @Input() actions: TableAction[] = [];
+  // Inputs usando signals
+  columns = input<TableColumn[]>([]);
+  data = input<any[]>([]);
+  actions = input<TableAction[]>([]);
 
-  @Output() rowClick = new EventEmitter<any>();
-  @Output() actionClick = new EventEmitter<{ action: TableAction, item: any }>();
+  // Outputs usando signals
+  rowClick = output<any>();
+  actionClick = output<{ action: TableAction, item: any }>();
 
   onRowClick(item: any): void {
     this.rowClick.emit(item);
@@ -45,12 +47,8 @@ export class TableListComponent {
     return item[column.key];
   }
 
-  getStatusClass(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'Jogando': 'status-playing',
-      'Completado': 'status-completed',
-      'Backlog': 'status-backlog'
-    };
-    return statusMap[status] || '';
+  getCellClass(item: any, column: TableColumn): string {
+    // Retorna a classe CSS configurada na coluna, ou vazia
+    return column.cssClass || '';
   }
 }

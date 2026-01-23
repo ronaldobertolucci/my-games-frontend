@@ -2,20 +2,20 @@
   <table>
     <thead>
       <tr>
-        <th *ngFor="let column of columns">{{ column.header }}</th>
-        <th *ngIf="actions.length > 0">Ações</th>
+        <th *ngFor="let column of columns()">{{ column.header }}</th>
+        <th *ngIf="actions().length > 0">Ações</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let item of data" (click)="onRowClick(item)">
-        <td *ngFor="let column of columns">
+      <tr *ngFor="let item of data()" (click)="onRowClick(item)">
+        <td *ngFor="let column of columns()">
           <ng-container [ngSwitch]="column.type">
             <!-- Tipo: icon-detail -->
-            <div *ngSwitchCase="'icon-detail'" class="game-cell">
-              <div class="game-icon">{{ item[column.iconKey || 'icon'] }}</div>
-              <div class="game-details">
-                <div class="game-name">{{ item[column.titleKey || 'name'] }}</div>
-                <div class="game-company" *ngIf="column.subtitleKey && item[column.subtitleKey]">
+            <div *ngSwitchCase="'icon-detail'" class="cell-with-icon">
+              <div class="item-icon">{{ item[column.iconKey || 'icon'] }}</div>
+              <div class="item-details">
+                <div class="item-title">{{ item[column.titleKey || 'name'] }}</div>
+                <div class="item-subtitle" *ngIf="column.subtitleKey && item[column.subtitleKey]">
                   {{ item[column.subtitleKey] }}
                 </div>
               </div>
@@ -24,14 +24,13 @@
             <!-- Tipo: badge -->
             <span *ngSwitchCase="'badge'" 
                   class="badge" 
-                  [ngClass]="column.badgeClass">
+                  [ngClass]="getCellClass(item, column)">
               {{ getCellValue(item, column) }}
             </span>
 
-            <!-- Tipo: status -->
-            <span *ngSwitchCase="'status'" 
-                  class="game-status" 
-                  [ngClass]="getStatusClass(getCellValue(item, column))">
+            <!-- Tipo: custom (permite classes dinâmicas) -->
+            <span *ngSwitchCase="'custom'" 
+                  [ngClass]="getCellClass(item, column)">
               {{ getCellValue(item, column) }}
             </span>
 
@@ -43,10 +42,10 @@
         </td>
 
         <!-- Ações -->
-        <td *ngIf="actions.length > 0">
+        <td *ngIf="actions().length > 0">
           <div class="actions">
-            <button *ngFor="let action of actions" 
-                    class="btn-icon" 
+            <button *ngFor="let action of actions()" 
+                    class="action-button" 
                     [title]="action.label"
                     (click)="onActionClick(action, item, $event)">
               {{ action.icon }}
