@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableListComponent, TableColumn, TableAction } from '../../shared/components/table-list/table-list.component';
@@ -24,8 +24,10 @@ import { ToastNotificationComponent } from '../../shared/components/toast-notifi
 })
 export class PlatformsComponent implements OnInit {
   private confirmService = inject(ConfirmService);
+  private platformService = inject(PlatformService);
 
-  columns: TableColumn[] = [
+  // Configuração da tabela (readonly)
+  readonly columns: TableColumn[] = [
     {
       key: 'name',
       header: 'Plataforma',
@@ -33,77 +35,77 @@ export class PlatformsComponent implements OnInit {
     }
   ];
 
-
-  actions: TableAction[] = [
+  readonly actions: TableAction[] = [
     { icon: '✏️', label: 'Editar', callback: (item) => this.editPlatform(item) },
     { icon: '🗑️', label: 'Excluir', callback: (item) => this.deletePlatform(item) }
   ];
 
-  platformsData: Platform[] = [];
-  searchTerm: string = '';
-  currentPage: number = 0;
-  totalPages: number = 0;
-  totalElements: number = 0;
-  pageSize: number = 10;
-  isLoading: boolean = false;
-  showForm: boolean = false;
-  editingPlatform: Platform | null = null;
-  formErrorMessage: string = '';
-  toastMessage: string = '';
-  toastType: 'success' | 'error' | 'warning' | 'info' = 'success';
-  showToast: boolean = false;
-  isFilterActive: boolean = false;
+  // Estado usando signals
+  platformsData = signal<Platform[]>([]);
+  searchTerm = signal<string>('');
+  currentPage = signal<number>(0);
+  totalPages = signal<number>(0);
+  totalElements = signal<number>(0);
+  pageSize = signal<number>(10);
+  isLoading = signal<boolean>(false);
+  showForm = signal<boolean>(false);
+  editingPlatform = signal<Platform | null>(null);
+  toastMessage = signal<string>('');
+  toastType = signal<'success' | 'error' | 'warning' | 'info'>('success');
+  showToast = signal<boolean>(false);
 
-  constructor(private platformService: PlatformService) { }
+  // Computed signals
+  isFilterActive = computed(() => this.searchTerm().trim().length > 0);
 
   ngOnInit(): void {
     this.loadPlatforms();
   }
 
   loadPlatforms(): void {
-    this.isLoading = true;
-    this.platformService.getPlatforms(this.currentPage, this.pageSize, this.searchTerm || undefined)
+    this.isLoading.set(true);
+    const searchValue = this.searchTerm().trim() || undefined;
+    
+    this.platformService.getPlatforms(this.currentPage(), this.pageSize(), searchValue)
       .subscribe({
         next: (response) => {
-          this.platformsData = response.content;
-          this.totalPages = response.totalPages;
-          this.totalElements = response.totalElements;
-          this.currentPage = response.number;
-          this.isLoading = false;
+          this.platformsData.set(response.content);
+          this.totalPages.set(response.totalPages);
+          this.totalElements.set(response.totalElements);
+          this.currentPage.set(response.number);
+          this.isLoading.set(false);
         },
         error: (error) => {
           console.error('Erro ao carregar plataformas:', error);
-          this.isLoading = false;
+          this.isLoading.set(false);
+          this.showToastMessage('Erro ao carregar plataformas', 'error');
         }
       });
   }
 
   onSearch(): void {
-    this.currentPage = 0;
-    this.isFilterActive = this.searchTerm.trim().length > 0;
+    this.currentPage.set(0);
     this.loadPlatforms();
   }
 
   clearSearch(): void {
-    this.searchTerm = '';
-    this.isFilterActive = false;
-    this.currentPage = 0;
+    this.searchTerm.set('');
+    this.currentPage.set(0);
     this.loadPlatforms();
   }
 
   onPageChange(page: number): void {
-    this.currentPage = page;
+    this.currentPage.set(page);
     this.loadPlatforms();
   }
 
   openCreateForm(): void {
-    this.editingPlatform = null;
-    this.showForm = true;
+    this.editingPlatform.set(null);
+    this.showForm.set(true);
   }
 
   editPlatform(platform: Platform): void {
-    this.editingPlatform = { ...platform };
-    this.showForm = true;
+    this.editingPlatform.set({ ...platform });
+    this.showForm.set(true);
   }
 
   deletePlatform(platform: Platform): void {
@@ -111,14 +113,15 @@ export class PlatformsComponent implements OnInit {
       'Confirmar Exclusão',
       `Deseja realmente excluir a plataforma "${platform.name}"?`
     ).subscribe((confirmed) => {
-
       if (confirmed) {
         this.platformService.deletePlatform(platform.id!).subscribe({
           next: () => {
+            this.showToastMessage('Plataforma excluída com sucesso!', 'success');
             this.loadPlatforms();
           },
           error: (error) => {
             console.error('Erro ao excluir plataforma:', error);
+            this.showToastMessage('Erro ao excluir plataforma', 'error');
           }
         });
       }
@@ -126,7 +129,9 @@ export class PlatformsComponent implements OnInit {
   }
 
   onFormSubmit(platform: Platform): void {
-    if (this.editingPlatform?.id) {
+    const isEditing = !!this.editingPlatform()?.id;
+    
+    if (isEditing) {
       this.platformService.updatePlatform(platform).subscribe({
         next: () => {
           this.showToastMessage('Plataforma atualizada com sucesso!', 'success');
@@ -168,18 +173,22 @@ export class PlatformsComponent implements OnInit {
   }
 
   private showToastMessage(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
-    this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
+    this.toastMessage.set(message);
+    this.toastType.set(type);
+    this.showToast.set(true);
   }
 
   closeForm(): void {
-    this.showForm = false;
-    this.editingPlatform = null;
-    this.formErrorMessage = '';
+    this.showForm.set(false);
+    this.editingPlatform.set(null);
   }
 
   handleAction(event: { action: TableAction, item: any }): void {
     event.action.callback(event.item);
+  }
+
+  // Helper para two-way binding do searchTerm no template
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
   }
 }
