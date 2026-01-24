@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { Router } from '@angular/router';
@@ -9,14 +9,12 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth`; 
-  private currentUserSubject = new BehaviorSubject<string | null>(this.getStoredUsername());
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {}
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly currentUserSubject = new BehaviorSubject<string | null>(this.getStoredUsername());
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
@@ -43,7 +41,6 @@ export class AuthService {
     if (!token) {
       return false;
     }
-    // Opcional: verificar se o token expirou
     return !this.isTokenExpired(token);
   }
 

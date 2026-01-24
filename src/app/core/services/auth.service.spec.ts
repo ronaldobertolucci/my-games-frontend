@@ -60,7 +60,7 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(mockLoginRequest);
-      
+
       req.flush(mockLoginResponse);
     });
 
@@ -112,7 +112,7 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/register`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(mockRegisterRequest);
-      
+
       req.flush({ message: 'User registered successfully' });
     });
 
@@ -141,7 +141,7 @@ describe('AuthService', () => {
 
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/register`);
       expect(req.request.body).toEqual(registerData);
-      
+
       req.flush({ message: 'Success' });
     });
   });
@@ -217,15 +217,24 @@ describe('AuthService', () => {
   });
 
   describe('currentUser$ observable', () => {
-    it('should emit stored username on initialization', (done) => {
+    it('should emit stored username on initialization', () => {
       localStorage.setItem('username', 'storeduser');
-      
-      // Criar nova instância do service para testar inicialização
-      const newService = new AuthService(TestBed.inject(HttpClientTestingModule) as any, routerMock);
-      
+
+      // Recriar o TestBed para testar inicialização com username armazenado
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [HttpClientTestingModule],
+        providers: [
+          AuthService,
+          { provide: Router, useValue: routerMock }
+        ]
+      });
+
+      const newService = TestBed.inject(AuthService);
+
+      // Usar firstValueFrom ou done callback
       newService.currentUser$.subscribe(username => {
         expect(username).toBe('storeduser');
-        done();
       });
     });
 
@@ -246,7 +255,7 @@ describe('AuthService', () => {
 
       service.login(firstLogin).subscribe(() => {
         expect(localStorage.getItem('username')).toBe('user1');
-        
+
         service.login(secondLogin).subscribe(() => {
           expect(localStorage.getItem('username')).toBe('user2');
           expect(localStorage.getItem('token')).toBe('token2');
