@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../core/models/auth.model';
 
@@ -13,74 +14,96 @@ import { RegisterRequest } from '../../../core/models/auth.model';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {
-  registerData: RegisterRequest = {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  // Signals para estado reativo
+  registerData = signal<RegisterRequest>({
     username: '',
     password: ''
-  };
-  confirmPassword: string = '';
-  errorMessage: string = '';
-  successMessage: string = '';
-  isLoading: boolean = false;
-
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  });
+  confirmPassword = signal<string>('');
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
+  isLoading = signal<boolean>(false);
 
   onSubmit(): void {
+    // Limpar mensagens
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const data = this.registerData();
+    const confirm = this.confirmPassword();
+
     // Validações
-    if (!this.registerData.username || !this.registerData.password) {
-      this.errorMessage = 'Por favor, preencha todos os campos';
+    if (!data.username || !data.password) {
+      this.errorMessage.set('Por favor, preencha todos os campos');
       return;
     }
 
-    if (this.registerData.password !== this.confirmPassword) {
-      this.errorMessage = 'As senhas não coincidem';
+    if (!this.isValidEmail(data.username)) {
+      this.errorMessage.set('Por favor, insira um e-mail válido');
       return;
     }
 
-    if (this.registerData.password.length < 6) {
-      this.errorMessage = 'A senha deve ter no mínimo 6 caracteres';
+    if (data.password.length < 6) {
+      this.errorMessage.set('A senha deve ter no mínimo 6 caracteres');
       return;
     }
 
-    if (!this.isValidEmail(this.registerData.username)) {
-      this.errorMessage = 'Por favor, insira um e-mail válido';
+    if (data.password !== confirm) {
+      this.errorMessage.set('As senhas não coincidem');
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading.set(true);
 
-    this.authService.register(this.registerData).subscribe({
-      next: (response) => {
-        this.successMessage = 'Cadastro realizado com sucesso! Redirecionando...';
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
-      },
-      error: (error) => {
-        console.error('Erro no registro:', error);
-        
-        if (error.status === 401 || error.status === 409) {
-          this.errorMessage = 'Este nome de usuário já está cadastrado';
-        } else if (error.error?.message) {
-          this.errorMessage = error.error.message;
-        } else {
-          this.errorMessage = 'Erro ao realizar cadastro. Tente novamente.';
+    this.authService.register(data)
+      .pipe(
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.successMessage.set('Cadastro realizado com sucesso! Redirecionando...');
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (error) => {
+          console.error('Erro no registro:', error);
+          this.errorMessage.set(this.getErrorMessage(error));
         }
-        
-        this.isLoading = false;
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
+      });
+  }
+
+  // Helpers para atualizar campos
+  updateUsername(username: string): void {
+    this.registerData.update(d => ({ ...d, username }));
+  }
+
+  updatePassword(password: string): void {
+    this.registerData.update(d => ({ ...d, password }));
+  }
+
+  updateConfirmPassword(password: string): void {
+    this.confirmPassword.set(password);
   }
 
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.status === 401 || error.status === 409) {
+      return 'Este e-mail já está cadastrado';
+    }
+    if (error.status === 0) {
+      return 'Erro de conexão. Verifique sua internet.';
+    }
+    if (error.status === 400) {
+      return error.error?.message || 'Dados inválidos';
+    }
+    return error.error?.message || 'Erro ao realizar cadastro. Tente novamente.';
   }
 }

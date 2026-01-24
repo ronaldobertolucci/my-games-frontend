@@ -1,22 +1,23 @@
 <div class="register-container">
   <div class="register-box">
     <div class="register-header">
-      <div class="logo">🎮 Meus Jogos</div>
+      <div class="logo">🎮 GameHub</div>
       <h2>Criar Conta</h2>
       <p>Cadastre-se para gerenciar seus jogos</p>
     </div>
 
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username">Nome de Usuário *</label>
+        <label for="username">E-mail *</label>
         <input 
-          type="text" 
+          type="email" 
           id="username"
           class="form-input"
-          [(ngModel)]="registerData.username"
+          [value]="registerData().username"
+          (input)="updateUsername($any($event.target).value)"
           name="username"
-          placeholder="Digite seu nome de usuário"
-          [disabled]="isLoading"
+          placeholder="Digite seu e-mail"
+          [disabled]="isLoading()"
           required>
       </div>
 
@@ -26,10 +27,11 @@
           type="password" 
           id="password"
           class="form-input"
-          [(ngModel)]="registerData.password"
+          [value]="registerData().password"
+          (input)="updatePassword($any($event.target).value)"
           name="password"
           placeholder="Digite sua senha (mín. 6 caracteres)"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           required>
       </div>
 
@@ -39,26 +41,27 @@
           type="password" 
           id="confirmPassword"
           class="form-input"
-          [(ngModel)]="confirmPassword"
+          [value]="confirmPassword()"
+          (input)="updateConfirmPassword($any($event.target).value)"
           name="confirmPassword"
           placeholder="Confirme sua senha"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           required>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
       </div>
 
-      <div class="success-message" *ngIf="successMessage">
-        {{ successMessage }}
+      <div class="success-message" *ngIf="successMessage()">
+        {{ successMessage() }}
       </div>
 
       <button 
         type="submit" 
         class="btn-register"
-        [disabled]="isLoading">
-        {{ isLoading ? 'Cadastrando...' : 'Criar Conta' }}
+        [disabled]="isLoading()">
+        {{ isLoading() ? 'Cadastrando...' : 'Criar Conta' }}
       </button>
     </form>
 
