@@ -1,7 +1,7 @@
 <div class="login-container">
   <div class="login-box">
     <div class="login-header">
-      <div class="logo">🎮 Meus Jogos</div>
+      <div class="logo">🎮 GameHub</div>
       <h2>Entrar</h2>
     </div>
 
@@ -12,10 +12,11 @@
           type="text" 
           id="username"
           class="form-input"
-          [(ngModel)]="credentials.username"
+          [value]="credentials().username"
+          (input)="updateUsername($any($event.target).value)"
           name="username"
           placeholder="Digite seu usuário"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           required>
       </div>
 
@@ -25,22 +26,23 @@
           type="password" 
           id="password"
           class="form-input"
-          [(ngModel)]="credentials.password"
+          [value]="credentials().password"
+          (input)="updatePassword($any($event.target).value)"
           name="password"
           placeholder="Digite sua senha"
-          [disabled]="isLoading"
+          [disabled]="isLoading()"
           required>
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
       </div>
 
       <button 
         type="submit" 
         class="btn-login"
-        [disabled]="isLoading">
-        {{ isLoading ? 'Entrando...' : 'Entrar' }}
+        [disabled]="isLoading()">
+        {{ isLoading() ? 'Entrando...' : 'Entrar' }}
       </button>
     </form>
 
