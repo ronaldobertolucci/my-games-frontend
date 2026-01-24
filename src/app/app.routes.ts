@@ -3,15 +3,31 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { PlatformsComponent } from './features/platforms/platforms.component';
 import { authGuard } from './core/guards/auth.guard';
+import { AuthLayoutComponent } from './shared/components/auth-layout/auth-layout.component';
+import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { 
-    path: 'platforms', 
-    component: PlatformsComponent,
-    canActivate: [authGuard]
-  },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
+
+  {
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent }
+    ]
+  },
+
+  {
+    path: '',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'platforms', component: PlatformsComponent }
+    ]
+  },
+
   { path: '**', redirectTo: '/login' }
 ];

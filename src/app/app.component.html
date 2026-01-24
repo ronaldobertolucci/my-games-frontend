@@ -1,14 +1,1 @@
-<ng-container *ngIf="isAuthenticated; else loginView">
-  <div class="container">
-    <app-sidebar></app-sidebar>
-    
-    <main class="main-content">
-      <router-outlet></router-outlet>
-    </main>
-    <app-confirm></app-confirm>
-  </div>
-</ng-container>
-
-<ng-template #loginView>
-  <router-outlet></router-outlet>
-</ng-template>
+<router-outlet></router-outlet>

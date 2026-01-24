@@ -43,7 +43,7 @@ export class LoginComponent {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/platforms']);
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           console.error('Erro no login:', error);
