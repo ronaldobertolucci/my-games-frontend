@@ -8,16 +8,7 @@ import { MainLayoutComponent } from './shared/components/main-layout/main-layout
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
-
-  {
-    path: '',
-    component: AuthLayoutComponent,
-    children: [
-      { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegisterComponent }
-    ]
-  },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 
   {
     path: '',
@@ -26,6 +17,15 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'platforms', component: PlatformsComponent }
+    ]
+  },
+
+  {
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent }
     ]
   },
 
