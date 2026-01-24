@@ -1,70 +1,67 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+
+// Apenas os endpoints relativos
+const PUBLIC_ENDPOINTS = [
+  '/auth/login',
+  '/auth/register',
+] as const;
+
+// Função helper para verificar rotas públicas
+function isPublicRoute(url: string): boolean {
+  return PUBLIC_ENDPOINTS.some(endpoint => 
+    url.includes(`${environment.apiUrl}${endpoint}`)
+  );
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Lista de rotas públicas que NÃO devem ter o token
-  const publicRoutes = [
-    '/api/auth/login',
-    '/api/auth/register',
-  ];
+  const router = inject(Router);
 
-  // Verifica se a requisição é para uma rota pública
-  const isPublicRoute = publicRoutes.some(route => req.url.includes(route));
-
-  // Se for rota pública, não adiciona o token
-  if (isPublicRoute) {
+  if (isPublicRoute(req.url)) {
     return next(req);
   }
 
-  // Para rotas protegidas, adiciona o token se existir e for válido
   const token = localStorage.getItem('token');
 
-  if (token) {
-    // Verifica se o token está expirado
-    if (isTokenExpired(token)) {
-      // Token expirado - limpa o storage
-      localStorage.removeItem('token');
-      
-      // Redireciona para login
-      const router = inject(Router);
-      router.navigate(['/login']);
-      
-      return next(req);
-    }
-
-    // Token válido - adiciona no header
-    const cloned = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
-    });
-    return next(cloned);
+  if (!token) {
+    return next(req);
   }
 
-  return next(req);
+  if (isTokenExpired(token)) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    router.navigate(['/login']);
+    return next(req);
+  }
+
+  const cloned = req.clone({
+    headers: req.headers.set('Authorization', `Bearer ${token}`)
+  });
+  
+  return next(cloned);
 };
 
-/**
- * Verifica se o token JWT está expirado
- * @param token Token JWT
- * @returns true se expirado, false caso contrário
- */
 function isTokenExpired(token: string): boolean {
   try {
-    // Decodifica o payload do JWT (parte do meio)
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const parts = token.split('.');
     
-    // Verifica se tem a propriedade 'exp' (expiration)
+    if (parts.length !== 3) {
+      return true;
+    }
+
+    const payload = JSON.parse(atob(parts[1]));
+    
     if (!payload.exp) {
       return true;
     }
 
-    // Converte para milissegundos e compara com a data atual
-    const expirationDate = new Date(payload.exp * 1000);
-    const now = new Date();
+    const expirationTime = payload.exp * 1000;
+    const now = Date.now();
     
-    return expirationDate < now;
+    return now >= expirationTime;
   } catch (error) {
-    // Se houver erro ao decodificar, considera como expirado
     console.error('Erro ao validar token:', error);
     return true;
   }
