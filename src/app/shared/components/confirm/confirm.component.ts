@@ -15,7 +15,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
           <p>{{ data.message }}</p>
           <div class="actions">
             <button class="btn-cancel" (click)="confirmService.handleResponse(false)">Cancelar</button>
-            <button class="btn-danger" (click)="confirmService.handleResponse(true)">Excluir</button>
+            <button class="btn-danger" (click)="confirmService.handleResponse(true)">Confirmar</button>
           </div>
         </div>
       </div>
