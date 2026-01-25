@@ -1,13 +1,13 @@
 <div class="login-container">
   <div class="login-box">
     <div class="login-header">
-      <div class="logo">🎮 GameHub</div>
+      <div class="logo">🎮 Meus Jogos</div>
       <h2>Entrar</h2>
     </div>
 
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username">Usuário</label>
+        <label for="username">E-mail</label>
         <input 
           type="text" 
           id="username"
@@ -15,7 +15,7 @@
           [value]="credentials().username"
           (input)="updateUsername($any($event.target).value)"
           name="username"
-          placeholder="Digite seu usuário"
+          placeholder="Digite seu e-mail"
           [disabled]="isLoading()"
           required>
       </div>
