@@ -229,7 +229,7 @@ describe('CompaniesComponent', () => {
 
       component.onFormSubmit({ name: 'Duplicate' });
 
-      expect(component.toastMessage()).toBe('Já existe uma plataforma com este nome');
+      expect(component.toastMessage()).toBe('Já existe uma empresa com este nome');
       expect(component.toastType()).toBe('error');
     });
 
