@@ -8,6 +8,7 @@ import { MainLayoutComponent } from './shared/components/main-layout/main-layout
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CompaniesComponent } from './features/companies/companies.component';
 import { SourcesComponent } from './features/sources/sources.component';
+import { GenresComponent } from './features/genres/genres.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -21,6 +22,7 @@ export const routes: Routes = [
       { path: 'companies', component: CompaniesComponent },
       { path: 'platforms', component: PlatformsComponent },
       { path: 'sources', component: SourcesComponent },
+      { path: 'genres', component: GenresComponent }
     ]
   },
 
