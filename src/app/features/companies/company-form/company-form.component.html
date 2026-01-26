@@ -1,0 +1,27 @@
+<div class="form-container">
+  <h3>{{ isEditMode() ? 'Editar Empresa' : 'Nova Empresa' }}</h3>
+  
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Nome da Empresa *</label>
+      <input 
+        type="text" 
+        id="name"
+        class="form-input"
+        [value]="formData().name"
+        (input)="updateName($any($event.target).value)"
+        name="name"
+        placeholder="Ex: CD Projekt Red"
+        required>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode() ? 'Atualizar' : 'Criar' }}
+      </button>
+    </div>
+  </form>
+</div>

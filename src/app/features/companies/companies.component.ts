@@ -1,0 +1,194 @@
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { TableListComponent, TableColumn, TableAction } from '../../shared/components/table-list/table-list.component';
+import { CompanyService } from '../../core/services/company.service';
+import { Company } from '../../core/models/company.model';
+import { CompanyFormComponent } from './company-form/company-form.component';
+import { inject } from '@angular/core';
+import { ConfirmService } from '../../core/services/confirm.service';
+import { ToastNotificationComponent } from '../../shared/components/toast-notification/toast-notification.component';
+
+@Component({
+  selector: 'app-companies',
+  standalone: true,
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    TableListComponent,
+    CompanyFormComponent,
+    ToastNotificationComponent
+  ],
+  templateUrl: './companies.component.html',
+  styleUrls: ['./companies.component.css']
+})
+export class CompaniesComponent implements OnInit {
+  private confirmService = inject(ConfirmService);
+  private companyService = inject(CompanyService);
+
+  // Configuração da tabela (readonly)
+  readonly columns: TableColumn[] = [
+    {
+      key: 'name',
+      header: 'Empresa',
+      type: 'text'
+    }
+  ];
+
+  readonly actions: TableAction[] = [
+    { icon: '✏️', label: 'Editar', callback: (item) => this.editCompany(item) },
+    { icon: '🗑️', label: 'Excluir', callback: (item) => this.deleteCompany(item) }
+  ];
+
+  // Estado usando signals
+  companiesData = signal<Company[]>([]);
+  searchTerm = signal<string>('');
+  currentPage = signal<number>(0);
+  totalPages = signal<number>(0);
+  totalElements = signal<number>(0);
+  pageSize = signal<number>(10);
+  isLoading = signal<boolean>(false);
+  showForm = signal<boolean>(false);
+  editingCompany = signal<Company | null>(null);
+  toastMessage = signal<string>('');
+  toastType = signal<'success' | 'error' | 'warning' | 'info'>('success');
+  showToast = signal<boolean>(false);
+
+  // Computed signals
+  isFilterActive = computed(() => this.searchTerm().trim().length > 0);
+
+  ngOnInit(): void {
+    this.loadCompanies();
+  }
+
+  loadCompanies(): void {
+    this.isLoading.set(true);
+    const searchValue = this.searchTerm().trim() || undefined;
+    
+    this.companyService.getCompanies(this.currentPage(), this.pageSize(), searchValue)
+      .subscribe({
+        next: (response) => {
+          this.companiesData.set(response.content);
+          this.totalPages.set(response.totalPages);
+          this.totalElements.set(response.totalElements);
+          this.currentPage.set(response.number);
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Erro ao carregar empresas:', error);
+          this.isLoading.set(false);
+          this.showToastMessage('Erro ao carregar empresas', 'error');
+        }
+      });
+  }
+
+  onSearch(): void {
+    this.currentPage.set(0);
+    this.loadCompanies();
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
+    this.currentPage.set(0);
+    this.loadCompanies();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    this.loadCompanies();
+  }
+
+  openCreateForm(): void {
+    this.editingCompany.set(null);
+    this.showForm.set(true);
+  }
+
+  editCompany(company: Company): void {
+    this.editingCompany.set({ ...company });
+    this.showForm.set(true);
+  }
+
+  deleteCompany(company: Company): void {
+    this.confirmService.confirm(
+      'Confirmar Exclusão',
+      `Deseja realmente excluir a empresa "${company.name}"?`
+    ).subscribe((confirmed) => {
+      if (confirmed) {
+        this.companyService.deleteCompany(company.id!).subscribe({
+          next: () => {
+            this.showToastMessage('Empresa excluída com sucesso!', 'success');
+            this.loadCompanies();
+          },
+          error: (error) => {
+            console.error('Erro ao excluir empresa:', error);
+            this.showToastMessage('Erro ao excluir empresa', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  onFormSubmit(company: Company): void {
+    const isEditing = !!this.editingCompany()?.id;
+    
+    if (isEditing) {
+      this.companyService.updateCompany(company).subscribe({
+        next: () => {
+          this.showToastMessage('Empresa atualizada com sucesso!', 'success');
+          this.closeForm();
+          this.loadCompanies();
+        },
+        error: (error) => {
+          console.error('Erro ao atualizar empresa:', error);
+          this.handleApiError(error);
+        }
+      });
+    } else {
+      this.companyService.createCompany(company).subscribe({
+        next: () => {
+          this.showToastMessage('Empresa criada com sucesso!', 'success');
+          this.closeForm();
+          this.loadCompanies();
+        },
+        error: (error) => {
+          console.error('Erro ao criar empresa:', error);
+          this.handleApiError(error);
+        }
+      });
+    }
+  }
+
+  private handleApiError(error: any): void {
+    let errorMessage = '';
+
+    if (error.status === 409) {
+      errorMessage = 'Já existe uma empresa com este nome';
+    } else if (error.status === 400) {
+      errorMessage = error.error?.message || 'Dados inválidos';
+    } else {
+      errorMessage = 'Erro ao processar solicitação';
+    }
+
+    this.showToastMessage(errorMessage, 'error');
+  }
+
+  private showToastMessage(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
+    this.toastMessage.set(message);
+    this.toastType.set(type);
+    this.showToast.set(true);
+  }
+
+  closeForm(): void {
+    this.showForm.set(false);
+    this.editingCompany.set(null);
+  }
+
+  handleAction(event: { action: TableAction, item: any }): void {
+    event.action.callback(event.item);
+  }
+
+  // Helper para two-way binding do searchTerm no template
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+  }
+}
