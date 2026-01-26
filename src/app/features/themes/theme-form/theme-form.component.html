@@ -1,0 +1,27 @@
+<div class="form-container">
+  <h3>{{ isEditMode() ? 'Editar Tema' : 'Novo Tema' }}</h3>
+  
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="name">Nome do Tema *</label>
+      <input 
+        type="text" 
+        id="name"
+        class="form-input"
+        [value]="formData().name"
+        (input)="updateName($any($event.target).value)"
+        name="name"
+        placeholder="Ex: Horror"
+        required>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode() ? 'Atualizar' : 'Criar' }}
+      </button>
+    </div>
+  </form>
+</div>
