@@ -7,6 +7,7 @@ import { AuthLayoutComponent } from './shared/components/auth-layout/auth-layout
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CompaniesComponent } from './features/companies/companies.component';
+import { SourcesComponent } from './features/sources/sources.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -18,7 +19,8 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'companies', component: CompaniesComponent },
-      { path: 'platforms', component: PlatformsComponent }
+      { path: 'platforms', component: PlatformsComponent },
+      { path: 'sources', component: SourcesComponent },
     ]
   },
 
