@@ -5,7 +5,7 @@ import { PlatformService } from '../../core/services/platform.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { of, throwError } from 'rxjs';
 import { Platform } from '../../core/models/platform.model';
-import { PaginatedResponse } from '../../core/models/platform-response.model';
+import { PaginatedResponse } from '../../core/models/paginated-response.model';
 
 describe('PlatformsComponent', () => {
   let component: PlatformsComponent;

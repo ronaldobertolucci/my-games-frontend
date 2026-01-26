@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { PlatformService } from './platform.service';
 import { Platform } from '../models/platform.model';
-import { PaginatedResponse } from '../models/platform-response.model';
+import { PaginatedResponse } from '../models/paginated-response.model';
 import { environment } from '../../../environments/environment';
 
 describe('PlatformService', () => {

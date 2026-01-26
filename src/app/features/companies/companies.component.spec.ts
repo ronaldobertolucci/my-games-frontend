@@ -5,7 +5,7 @@ import { CompanyService } from '../../core/services/company.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { of, throwError } from 'rxjs';
 import { Company } from '../../core/models/company.model';
-import { PaginatedResponse } from '../../core/models/platform-response.model';
+import { PaginatedResponse } from '../../core/models/paginated-response.model';
 
 describe('CompaniesComponent', () => {
   let component: CompaniesComponent;
