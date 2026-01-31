@@ -9,6 +9,7 @@ export interface TableColumn {
   iconKey?: string;
   titleKey?: string;
   subtitleKey?: string;
+  transform?: (item: any) => any;
 }
 
 export interface TableAction {
@@ -42,11 +43,14 @@ export class TableListComponent {
     event.stopPropagation();
     this.actionClick.emit({ action, item });
   }
-
+  
   getCellValue(item: any, column: TableColumn): any {
+    if (column.transform) {
+      return column.transform(item);
+    }
     return item[column.key];
   }
-
+  
   getCellClass(item: any, column: TableColumn): string {
     // Retorna a classe CSS configurada na coluna, ou vazia
     return column.cssClass || '';

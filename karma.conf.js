@@ -19,6 +19,17 @@ module.exports = function(config) {
         flags: ['-headless']
       }
     },
+    jasmineHtmlReporter: {
+      suppressAll: true
+    },
+    browserConsoleLogOptions: {
+      level: 'error',
+      format: '%b %T: %m',
+      terminal: false
+    },
+    reporters: ['progress'],
+    logLevel: config.LOG_ERROR,
+
     restartOnFileChange: true
   });
 };

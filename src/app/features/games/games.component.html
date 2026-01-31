@@ -1,0 +1,82 @@
+<div class="games-page">
+  <div class="page-header">
+    <h2>Jogos</h2>
+    <button class="btn-primary" (click)="openCreateForm()">+ Novo Jogo</button>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="search-input"
+      [class.search-input-active]="isFilterActive()"
+      placeholder="Buscar jogo por título..."
+      [value]="searchTerm()"
+      (input)="updateSearchTerm($any($event.target).value)"
+      (keyup.enter)="onSearch()">
+    <button class="btn-search" (click)="onSearch()">🔍 Buscar</button>
+    <button
+      class="btn-clear"
+      *ngIf="isFilterActive()"
+      (click)="clearSearch()"
+      title="Limpar filtro">
+      ✕
+    </button>
+  </div>
+
+  <!-- Badge de filtro ativo -->
+  <div class="filter-indicator" *ngIf="isFilterActive()">
+    <span class="filter-badge">
+      🔍 Filtro ativo: "{{ searchTerm() }}"
+      <button class="filter-badge-close" (click)="clearSearch()">✕</button>
+    </span>
+  </div>
+
+  <div class="loading" *ngIf="isLoading()">Carregando...</div>
+
+  <app-table-list
+    *ngIf="!isLoading()"
+    [columns]="columns"
+    [data]="gamesData()"
+    [actions]="actions"
+    (actionClick)="handleAction($event)">
+  </app-table-list>
+
+  <div class="pagination" *ngIf="totalPages() > 1">
+    <button
+      class="btn-page"
+      [disabled]="currentPage() === 0"
+      (click)="onPageChange(currentPage() - 1)">
+      ← Anterior
+    </button>
+
+    <span class="page-info">
+      Página {{ currentPage() + 1 }} de {{ totalPages() }}
+      ({{ totalElements() }} {{ isFilterActive() ? 'resultado(s) encontrado(s)' : 'itens' }})
+    </span>
+
+    <button
+      class="btn-page"
+      [disabled]="currentPage() >= totalPages() - 1"
+      (click)="onPageChange(currentPage() + 1)">
+      Próxima →
+    </button>
+  </div>
+
+  <!-- Modal de Formulário -->
+  <div class="modal-overlay" *ngIf="showForm()" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-game-form
+        [game]="editingGame()"
+        (save)="onFormSubmit($event)"
+        (cancel)="closeForm()">
+      </app-game-form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<app-toast-notification
+  [message]="toastMessage()"
+  [type]="toastType()"
+  [(show)]="showToast">
+</app-toast-notification>

@@ -1,0 +1,200 @@
+<div class="form-container">
+  <h3>{{ isEditMode() ? 'Editar Jogo' : 'Novo Jogo' }}</h3>
+
+  <form (ngSubmit)="onSubmit()">
+    <!-- Título -->
+    <div class="form-group">
+      <label for="title">Título *</label>
+      <input
+        type="text"
+        id="title"
+        class="form-input"
+        [value]="formData().title"
+        (input)="updateTitle($any($event.target).value)"
+        placeholder="Ex: The Witcher 3"
+        required>
+    </div>
+
+    <!-- Descrição -->
+    <div class="form-group">
+      <label for="description">Descrição</label>
+      <textarea
+        id="description"
+        class="form-textarea"
+        [value]="formData().description"
+        (input)="updateDescription($any($event.target).value)"
+        placeholder="Breve descrição do jogo"
+        rows="3"></textarea>
+    </div>
+
+    <!-- Data de Lançamento -->
+    <div class="form-group">
+      <label for="released_at">Data de Lançamento</label>
+      <input
+        type="date"
+        id="released_at"
+        class="form-input"
+        [value]="formData().released_at"
+        (input)="updateReleasedAt($any($event.target).value)"
+        required>
+    </div>
+
+    <!-- Empresa -->
+    <div class="form-group">
+      <label for="company_id">Empresa *</label>
+      <div class="input-with-action">
+        <select
+          id="company_id"
+          class="form-select"
+          [value]="formData().company_id"
+          (change)="updateCompanyId(+$any($event.target).value)"
+          required>
+          <option value="0">Selecione uma empresa</option>
+          <option *ngFor="let company of companies()" [value]="company.id">
+            {{ company.name }}
+          </option>
+        </select>
+        <button type="button" class="btn-add" (click)="openCompanyModal()" title="Criar nova empresa">
+          +
+        </button>
+      </div>
+    </div>
+
+    <!-- Gêneros com Dropdown + Tags -->
+    <div class="form-group">
+      <label>Gêneros</label>
+      
+      <!-- Tags dos gêneros selecionados -->
+      <div class="selected-tags" *ngIf="formData().genre_ids && formData().genre_ids.length > 0">
+        <span *ngFor="let genreId of formData().genre_ids" class="tag tag-genre">
+          {{ getGenreName(genreId) }}
+          <button type="button" class="tag-remove" (click)="toggleGenre(genreId)">×</button>
+        </span>
+      </div>
+      
+      <!-- Dropdown de seleção -->
+      <div class="input-with-action">
+        <select
+          class="form-select"
+          (change)="addGenreFromDropdown($any($event.target).value); $any($event.target).value = '0'">
+          <option value="0">Selecione um gênero</option>
+          <option *ngFor="let genre of availableGenres()" [value]="genre.id">
+            {{ genre.name }}
+          </option>
+        </select>
+        <button type="button" class="btn-add" (click)="openGenreModal()" title="Criar novo gênero">
+          +
+        </button>
+      </div>
+      
+      <div *ngIf="genres().length === 0" class="empty-state">
+        Nenhum gênero cadastrado. Clique em "+" para criar.
+      </div>
+    </div>
+
+    <!-- Temas com Dropdown + Tags -->
+    <div class="form-group">
+      <label>Temas</label>
+      
+      <!-- Tags dos temas selecionados -->
+      <div class="selected-tags" *ngIf="formData().theme_ids && formData().theme_ids.length > 0">
+        <span *ngFor="let themeId of formData().theme_ids" class="tag tag-theme">
+          {{ getThemeName(themeId) }}
+          <button type="button" class="tag-remove" (click)="toggleTheme(themeId)">×</button>
+        </span>
+      </div>
+      
+      <!-- Dropdown de seleção -->
+      <div class="input-with-action">
+        <select
+          class="form-select"
+          (change)="addThemeFromDropdown($any($event.target).value); $any($event.target).value = '0'">
+          <option value="0">Selecione um tema</option>
+          <option *ngFor="let theme of availableThemes()" [value]="theme.id">
+            {{ theme.name }}
+          </option>
+        </select>
+        <button type="button" class="btn-add" (click)="openThemeModal()" title="Criar novo tema">
+          +
+        </button>
+      </div>
+      
+      <div *ngIf="themes().length === 0" class="empty-state">
+        Nenhum tema cadastrado. Clique em "+" para criar.
+      </div>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- Ações -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode() ? 'Atualizar' : 'Criar' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Modais permanecem iguais -->
+<div class="mini-modal-overlay" *ngIf="showCompanyModal()" (click)="closeCompanyModal()">
+  <div class="mini-modal-content" (click)="$event.stopPropagation()">
+    <h4>Nova Empresa</h4>
+    <input
+      type="text"
+      class="form-input"
+      [value]="newCompanyName()"
+      (input)="newCompanyName.set($any($event.target).value)"
+      placeholder="Nome da empresa"
+      (keyup.enter)="createCompany()">
+    <div class="mini-modal-actions">
+      <button type="button" class="btn-cancel" (click)="closeCompanyModal()">Cancelar</button>
+      <button type="button" class="btn-submit" (click)="createCompany()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mini-modal-overlay" *ngIf="showGenreModal()" (click)="closeGenreModal()">
+  <div class="mini-modal-content" (click)="$event.stopPropagation()">
+    <h4>Novo Gênero</h4>
+    <input
+      type="text"
+      class="form-input"
+      [value]="newGenreName()"
+      (input)="newGenreName.set($any($event.target).value)"
+      placeholder="Nome do gênero"
+      (keyup.enter)="createGenre()">
+    <div class="mini-modal-actions">
+      <button type="button" class="btn-cancel" (click)="closeGenreModal()">Cancelar</button>
+      <button type="button" class="btn-submit" (click)="createGenre()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mini-modal-overlay" *ngIf="showThemeModal()" (click)="closeThemeModal()">
+  <div class="mini-modal-content" (click)="$event.stopPropagation()">
+    <h4>Novo Tema</h4>
+    <input
+      type="text"
+      class="form-input"
+      [value]="newThemeName()"
+      (input)="newThemeName.set($any($event.target).value)"
+      placeholder="Nome do tema"
+      (keyup.enter)="createTheme()">
+    <div class="mini-modal-actions">
+      <button type="button" class="btn-cancel" (click)="closeThemeModal()">Cancelar</button>
+      <button type="button" class="btn-submit" (click)="createTheme()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<app-toast-notification
+  [message]="toastMessage()"
+  [type]="toastType()"
+  [(show)]="showToast">
+</app-toast-notification>
