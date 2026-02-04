@@ -11,6 +11,7 @@ import { SourcesComponent } from './features/sources/sources.component';
 import { GenresComponent } from './features/genres/genres.component';
 import { ThemesComponent } from './features/themes/themes.component';
 import { GamesComponent } from './features/games/games.component';
+import { MyGamesComponent } from './features/my-games/my-games.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -21,6 +22,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'my-games', component: MyGamesComponent },
       { path: 'games', component: GamesComponent },
       { path: 'companies', component: CompaniesComponent },
       { path: 'platforms', component: PlatformsComponent },
