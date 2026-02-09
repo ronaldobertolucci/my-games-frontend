@@ -275,4 +275,167 @@ describe('AuthService', () => {
       expect(routerMock.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
+
+  describe('forgotPassword', () => {
+    it('should send POST request to /password/forgot with email', (done) => {
+      const email = 'test@example.com';
+
+      service.forgotPassword(email).subscribe(response => {
+        expect(response).toBeTruthy();
+        done();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/forgot`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ email });
+      expect(req.request.responseType).toBe('text');
+
+      req.flush('Email sent');
+    });
+
+    it('should handle error when email is not found', (done) => {
+      const email = 'notfound@example.com';
+
+      service.forgotPassword(email).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(404);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/forgot`);
+      req.flush('Email not found', { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should handle network error', (done) => {
+      const email = 'test@example.com';
+
+      service.forgotPassword(email).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(0);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/forgot`);
+      req.error(new ProgressEvent('error'), { status: 0 });
+    });
+  });
+
+  describe('validateResetToken', () => {
+    it('should send GET request to /password/reset/validate with token', (done) => {
+      const token = 'valid-token-123';
+
+      service.validateResetToken(token).subscribe(response => {
+        expect(response).toBeTruthy();
+        done();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset/validate?token=${token}`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('token')).toBe(token);
+      expect(req.request.responseType).toBe('text');
+
+      req.flush('Valid');
+    });
+
+    it('should handle invalid token error', (done) => {
+      const token = 'invalid-token';
+
+      service.validateResetToken(token).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(400);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset/validate?token=${token}`);
+      req.flush('Invalid token', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle expired token error', (done) => {
+      const token = 'expired-token';
+
+      service.validateResetToken(token).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(400);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset/validate?token=${token}`);
+      req.flush('Token expired', { status: 400, statusText: 'Bad Request' });
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should send POST request to /password/reset with token and new password', (done) => {
+      const token = 'valid-token-123';
+      const newPassword = 'newPassword123';
+
+      service.resetPassword(token, newPassword).subscribe(response => {
+        expect(response).toBeTruthy();
+        done();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ token, new_password: newPassword });
+      expect(req.request.responseType).toBe('text');
+
+      req.flush('Password reset successful');
+    });
+
+    it('should handle expired token error', (done) => {
+      const token = 'expired-token';
+      const newPassword = 'newPassword123';
+
+      service.resetPassword(token, newPassword).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(400);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset`);
+      req.flush('Token expired', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle invalid token error', (done) => {
+      const token = 'invalid-token';
+      const newPassword = 'newPassword123';
+
+      service.resetPassword(token, newPassword).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(400);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset`);
+      req.flush('Invalid token', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should handle server error', (done) => {
+      const token = 'valid-token';
+      const newPassword = 'newPassword123';
+
+      service.resetPassword(token, newPassword).subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.status).toBe(500);
+          done();
+        }
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/password/reset`);
+      req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
+    });
+  });
 });

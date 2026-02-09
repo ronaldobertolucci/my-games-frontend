@@ -67,4 +67,32 @@ export class AuthService {
       return true;
     }
   }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/password/forgot`,
+      { email },
+      {
+        responseType: 'text'
+      }
+    );
+  }
+
+  validateResetToken(token: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/password/reset/validate`, {
+      params: { token },
+      responseType: 'text'
+    });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/password/reset`,
+      {
+        token,
+        new_password: newPassword
+      },
+      {
+        responseType: 'text'
+      }
+    );
+  }
 }
