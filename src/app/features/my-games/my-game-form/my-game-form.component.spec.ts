@@ -5,7 +5,7 @@ import { MyGameService } from '../../../core/services/my-game.service';
 import { PlatformService } from '../../../core/services/platform.service';
 import { SourceService } from '../../../core/services/source.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import { MyGame } from '../../../core/models/my-game.model';
+import { MyGame, MyGameStatus } from '../../../core/models/my-game.model';
 import { Platform } from '../../../core/models/platform.model';
 import { Source } from '../../../core/models/source.model';
 import { PaginatedResponse } from '../../../core/models/paginated-response.model';
@@ -72,6 +72,15 @@ describe('MyGamesComponent', () => {
     last: true
   };
 
+  // Status permitidos (exceto WISHLIST)
+  const ALLOWED_STATUSES: MyGameStatus[] = [
+    'NOT_PLAYED',
+    'PLAYING',
+    'COMPLETED',
+    'ABANDONED',
+    'ON_HOLD'
+  ];
+
   beforeEach(async () => {
     const myGameServiceSpy = jasmine.createSpyObj('MyGameService', [
       'getMyGames',
@@ -116,7 +125,7 @@ describe('MyGamesComponent', () => {
 
       expect(platformService.getPlatforms).toHaveBeenCalledWith(0, 100);
       expect(sourceService.getSources).toHaveBeenCalledWith(0, 100);
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, undefined);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, undefined, ALLOWED_STATUSES);
       expect(component.platforms()).toEqual(mockPlatforms);
       expect(component.sources()).toEqual(mockSources);
       expect(component.myGamesData()).toEqual(mockMyGames);
@@ -149,7 +158,7 @@ describe('MyGamesComponent', () => {
     it('should load my games without filters', () => {
       component.loadMyGames();
 
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, undefined);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, undefined, ALLOWED_STATUSES);
       expect(component.myGamesData()).toEqual(mockMyGames);
       expect(component.isLoading()).toBe(false);
     });
@@ -158,21 +167,21 @@ describe('MyGamesComponent', () => {
       component.searchTitle.set('witcher');
       component.loadMyGames();
 
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, 'witcher', undefined, undefined);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, 'witcher', undefined, undefined, ALLOWED_STATUSES);
     });
 
     it('should load my games with platform filter', () => {
       component.selectedPlatformId.set(1);
       component.loadMyGames();
 
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, 1, undefined);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, 1, undefined, ALLOWED_STATUSES);
     });
 
     it('should load my games with source filter', () => {
       component.selectedSourceId.set(2);
       component.loadMyGames();
 
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, 2);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, undefined, undefined, 2, ALLOWED_STATUSES);
     });
 
     it('should load my games with all filters', () => {
@@ -181,7 +190,7 @@ describe('MyGamesComponent', () => {
       component.selectedSourceId.set(1);
       component.loadMyGames();
 
-      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, 'zelda', 2, 1);
+      expect(myGameService.getMyGames).toHaveBeenCalledWith(0, 10, 'zelda', 2, 1, ALLOWED_STATUSES);
     });
 
     it('should set loading state correctly', () => {

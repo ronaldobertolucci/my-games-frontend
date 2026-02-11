@@ -5,7 +5,7 @@ import { TableListComponent, TableColumn, TableAction } from '../../shared/compo
 import { MyGameService } from '../../core/services/my-game.service';
 import { PlatformService } from '../../core/services/platform.service';
 import { SourceService } from '../../core/services/source.service';
-import { MyGame } from '../../core/models/my-game.model';
+import { MyGame, MyGameStatus } from '../../core/models/my-game.model';
 import { Platform } from '../../core/models/platform.model';
 import { Source } from '../../core/models/source.model';
 import { MyGameFormComponent } from './my-game-form/my-game-form.component';
@@ -31,6 +31,15 @@ export class MyGamesComponent implements OnInit {
   private readonly myGameService = inject(MyGameService);
   private readonly platformService = inject(PlatformService);
   private readonly sourceService = inject(SourceService);
+
+  // Status que queremos mostrar (todos exceto WISHLIST)
+  private readonly ALLOWED_STATUSES: MyGameStatus[] = [
+    'NOT_PLAYED',
+    'PLAYING',
+    'COMPLETED',
+    'ABANDONED',
+    'ON_HOLD'
+  ];
 
   // Configuração da tabela
   readonly columns: TableColumn[] = [
@@ -158,7 +167,8 @@ export class MyGamesComponent implements OnInit {
       this.pageSize(), 
       titleValue,
       platformValue,
-      sourceValue
+      sourceValue,
+      this.ALLOWED_STATUSES
     ).subscribe({
       next: (response) => {
         this.myGamesData.set(response.content);

@@ -119,6 +119,48 @@ describe('MyGameService', () => {
       req.flush(mockResponse);
     });
 
+    it('should fetch my games with status filter', () => {
+      const mockResponse: PaginatedResponse<MyGame> = {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: 0,
+        size: 10,
+        first: true,
+        last: true
+      };
+
+      const statuses: MyGameStatus[] = ['PLAYING', 'COMPLETED'];
+
+      service.getMyGames(0, 10, undefined, undefined, undefined, statuses).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=10&status=PLAYING&status=COMPLETED`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+
+    it('should fetch my games with single status filter', () => {
+      const mockResponse: PaginatedResponse<MyGame> = {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: 0,
+        size: 10,
+        first: true,
+        last: true
+      };
+
+      service.getMyGames(0, 10, undefined, undefined, undefined, ['WISHLIST']).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=10&status=WISHLIST`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+
     it('should fetch my games with all filters', () => {
       const mockResponse: PaginatedResponse<MyGame> = {
         content: [],
@@ -130,11 +172,33 @@ describe('MyGameService', () => {
         last: true
       };
 
-      service.getMyGames(1, 20, 'zelda', 3, 2).subscribe(response => {
+      const statuses: MyGameStatus[] = ['PLAYING', 'COMPLETED', 'ON_HOLD'];
+
+      service.getMyGames(1, 20, 'zelda', 3, 2, statuses).subscribe(response => {
         expect(response).toEqual(mockResponse);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?page=1&size=20&title=zelda&platform_id=3&source_id=2`);
+      const req = httpMock.expectOne(`${apiUrl}?page=1&size=20&title=zelda&platform_id=3&source_id=2&status=PLAYING&status=COMPLETED&status=ON_HOLD`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+
+    it('should not add status parameter when empty array is provided', () => {
+      const mockResponse: PaginatedResponse<MyGame> = {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+        number: 0,
+        size: 10,
+        first: true,
+        last: true
+      };
+
+      service.getMyGames(0, 10, undefined, undefined, undefined, []).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=10`);
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -239,7 +303,7 @@ describe('MyGameService', () => {
 
   describe('deleteMyGame', () => {
     it('should delete a my game', () => {
-      service.deleteMyGame(7).subscribe(); // ✅ Não precisa verificar nada
+      service.deleteMyGame(7).subscribe();
 
       const req = httpMock.expectOne(`${apiUrl}/7`);
       expect(req.request.method).toBe('DELETE');

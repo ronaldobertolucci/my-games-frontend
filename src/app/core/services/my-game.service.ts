@@ -17,7 +17,8 @@ export class MyGameService {
     size: number = 10, 
     title?: string,
     platformId?: number,
-    sourceId?: number
+    sourceId?: number,
+    statuses?: MyGameStatus[]
   ): Observable<PaginatedResponse<MyGame>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -33,6 +34,12 @@ export class MyGameService {
 
     if (sourceId) {
       params = params.set('source_id', sourceId.toString());
+    }
+
+    if (statuses && statuses.length > 0) {
+      statuses.forEach(status => {
+        params = params.append('status', status);
+      });
     }
 
     return this.http.get<PaginatedResponse<MyGame>>(this.apiUrl, { params });
