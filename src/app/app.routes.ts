@@ -13,6 +13,7 @@ import { GamesComponent } from './features/games/games.component';
 import { MyGamesComponent } from './features/my-games/my-games.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { WishlistComponent } from './features/wishlist/wishlist.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/my-games', pathMatch: 'full' },
@@ -23,6 +24,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'my-games', component: MyGamesComponent },
+      { path: 'wishlist', component: WishlistComponent },
       { path: 'games', component: GamesComponent },
       { path: 'companies', component: CompaniesComponent },
       { path: 'platforms', component: PlatformsComponent },
