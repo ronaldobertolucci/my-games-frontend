@@ -43,7 +43,7 @@ export class LoginComponent {
       )
       .subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/my-games']);
         },
         error: (error) => {
           console.error('Erro no login:', error);

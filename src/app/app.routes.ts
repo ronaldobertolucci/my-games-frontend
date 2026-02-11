@@ -5,7 +5,6 @@ import { PlatformsComponent } from './features/platforms/platforms.component';
 import { authGuard } from './core/guards/auth.guard';
 import { AuthLayoutComponent } from './shared/components/auth-layout/auth-layout.component';
 import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CompaniesComponent } from './features/companies/companies.component';
 import { SourcesComponent } from './features/sources/sources.component';
 import { GenresComponent } from './features/genres/genres.component';
@@ -16,14 +15,13 @@ import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: '/my-games', pathMatch: 'full' },
 
   {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
       { path: 'my-games', component: MyGamesComponent },
       { path: 'games', component: GamesComponent },
       { path: 'companies', component: CompaniesComponent },
