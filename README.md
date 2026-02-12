@@ -2,6 +2,21 @@
 
 Esse projeto foi gerado usando [Angular CLI](https://github.com/angular/angular-cli) versão 19.2.19.
 
+## Instale as dependências do projeto
+
+```bash
+npm install
+```
+
+## Crie um arquivo de variáveis de ambiente em src/environments
+
+```js
+export const environment = {
+  production: false,
+  apiUrl: 'api-url'
+};
+```
+
 ## Servidor de desenvolvimento
 
 Para desenvolvimento local, rode
