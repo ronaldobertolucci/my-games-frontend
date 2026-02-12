@@ -5,7 +5,7 @@ mkdir -p /app/dist/my-games-frontend/browser/assets
 
 cat > /app/dist/my-games-frontend/browser/assets/env.js <<EOF
 window.__env = {
-  apiUrl: '${API_URL:-http://localhost:8080/api}',
+  apiUrl: '${API_URL:-/api}',
   production: ${PRODUCTION:-true}
 };
 EOF
