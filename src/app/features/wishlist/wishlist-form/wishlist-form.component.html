@@ -1,0 +1,181 @@
+<div class="form-container">
+  <h3>{{ isEditMode() ? 'Editar Jogo da Coleção' : 'Adicionar Jogo à Coleção' }}</h3>
+
+  <form (ngSubmit)="onSubmit()">
+    <!-- Jogo -->
+    <div class="form-group">
+      <label for="game_id">Jogo *</label>
+      <div class="input-with-action">
+        <select
+          id="game_id"
+          class="form-select"
+          [(ngModel)]="gameId"
+          [ngModelOptions]="{updateOn: 'change'}"
+          name="game_id"
+          [disabled]="isEditMode()"
+          required>
+          <option [value]="0">Selecione um jogo</option>
+          <option *ngFor="let game of games()" [value]="game.id">
+            {{ game.title }}
+          </option>
+        </select>
+        <button 
+          type="button" 
+          class="btn-add" 
+          (click)="openGameModal()" 
+          [disabled]="isEditMode()"
+          title="Criar novo jogo">
+          +
+        </button>
+      </div>
+      <small class="field-hint" *ngIf="isEditMode()">
+        O jogo não pode ser alterado durante a edição
+      </small>
+    </div>
+
+    <!-- Plataforma -->
+    <div class="form-group">
+      <label for="platform_id">Plataforma *</label>
+      <div class="input-with-action">
+        <select
+          id="platform_id"
+          class="form-select"
+          [(ngModel)]="platformId"
+          [ngModelOptions]="{updateOn: 'change'}"
+          name="platform_id"
+          [disabled]="isEditMode()"
+          required>
+          <option [value]="0">Selecione uma plataforma</option>
+          <option *ngFor="let platform of platforms()" [value]="platform.id">
+            {{ platform.name }}
+          </option>
+        </select>
+        <button 
+          type="button" 
+          class="btn-add" 
+          (click)="openPlatformModal()"
+          [disabled]="isEditMode()"
+          title="Criar nova plataforma">
+          +
+        </button>
+      </div>
+      <small class="field-hint" *ngIf="isEditMode()">
+        A plataforma não pode ser alterada durante a edição
+      </small>
+    </div>
+
+    <!-- Loja/Origem -->
+    <div class="form-group">
+      <label for="source_id">Loja/Origem *</label>
+      <div class="input-with-action">
+        <select
+          id="source_id"
+          class="form-select"
+          [(ngModel)]="sourceId"
+          [ngModelOptions]="{updateOn: 'change'}"
+          name="source_id"
+          [disabled]="isEditMode()"
+          required>
+          <option [value]="0">Selecione uma loja</option>
+          <option *ngFor="let source of sources()" [value]="source.id">
+            {{ source.name }}
+          </option>
+        </select>
+        <button 
+          type="button" 
+          class="btn-add" 
+          (click)="openSourceModal()"
+          [disabled]="isEditMode()"
+          title="Criar nova loja">
+          +
+        </button>
+      </div>
+      <small class="field-hint" *ngIf="isEditMode()">
+        A loja não pode ser alterada durante a edição
+      </small>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label for="status">Status *</label>
+      <select
+        id="status"
+        class="form-select"
+        [(ngModel)]="status"
+        [ngModelOptions]="{updateOn: 'change'}"
+        name="status"
+        required>
+        <option *ngFor="let option of statusOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="error-message" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- Ações -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button type="submit" class="btn-submit">
+        {{ isEditMode() ? 'Atualizar' : 'Adicionar' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal de Criação de Game (reutiliza GameFormComponent) -->
+<div class="game-modal-overlay" *ngIf="showGameModal()" (click)="closeGameModal()">
+  <div class="game-modal-content" (click)="$event.stopPropagation()">
+    <app-game-form
+      (save)="onGameCreated($event)"
+      (cancel)="closeGameModal()">
+    </app-game-form>
+  </div>
+</div>
+
+<!-- Mini Modal - Plataforma -->
+<div class="mini-modal-overlay" *ngIf="showPlatformModal()" (click)="closePlatformModal()">
+  <div class="mini-modal-content" (click)="$event.stopPropagation()">
+    <h4>Nova Plataforma</h4>
+    <input
+      type="text"
+      class="form-input"
+      [value]="newPlatformName()"
+      (input)="newPlatformName.set($any($event.target).value)"
+      placeholder="Nome da plataforma (ex: PC, PS5, Xbox)"
+      (keyup.enter)="createPlatform()">
+    <div class="mini-modal-actions">
+      <button type="button" class="btn-cancel" (click)="closePlatformModal()">Cancelar</button>
+      <button type="button" class="btn-submit" (click)="createPlatform()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mini Modal - Loja -->
+<div class="mini-modal-overlay" *ngIf="showSourceModal()" (click)="closeSourceModal()">
+  <div class="mini-modal-content" (click)="$event.stopPropagation()">
+    <h4>Nova Loja/Origem</h4>
+    <input
+      type="text"
+      class="form-input"
+      [value]="newSourceName()"
+      (input)="newSourceName.set($any($event.target).value)"
+      placeholder="Nome da loja (ex: Steam, Epic Games)"
+      (keyup.enter)="createSource()">
+    <div class="mini-modal-actions">
+      <button type="button" class="btn-cancel" (click)="closeSourceModal()">Cancelar</button>
+      <button type="button" class="btn-submit" (click)="createSource()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<app-toast-notification
+  [message]="toastMessage()"
+  [type]="toastType()"
+  [(show)]="showToast">
+</app-toast-notification>

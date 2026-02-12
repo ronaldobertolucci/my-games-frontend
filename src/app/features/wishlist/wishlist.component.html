@@ -97,11 +97,11 @@
   <!-- Modal de Formulário -->
   <div class="modal-overlay" *ngIf="showForm()" (click)="closeForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <app-my-game-form
+      <app-wishlist-form
         [myGame]="editingMyGame()"
         (save)="onFormSubmit($event)"
         (cancel)="closeForm()">
-      </app-my-game-form>
+      </app-wishlist-form>
     </div>
   </div>
 </div>

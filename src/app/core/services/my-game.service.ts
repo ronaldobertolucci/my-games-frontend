@@ -13,8 +13,8 @@ export class MyGameService {
   private readonly apiUrl = `${environment.apiUrl}/my-games`;
 
   getMyGames(
-    page: number = 0, 
-    size: number = 10, 
+    page: number = 0,
+    size: number = 10,
     title?: string,
     platformId?: number,
     sourceId?: number,
@@ -23,7 +23,7 @@ export class MyGameService {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
-    
+
     if (title) {
       params = params.set('title', title);
     }
@@ -37,9 +37,7 @@ export class MyGameService {
     }
 
     if (statuses && statuses.length > 0) {
-      statuses.forEach(status => {
-        params = params.append('status', status);
-      });
+      params = params.set('status', statuses.join(','));
     }
 
     return this.http.get<PaginatedResponse<MyGame>>(this.apiUrl, { params });

@@ -136,7 +136,7 @@ describe('MyGameService', () => {
         expect(response).toEqual(mockResponse);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?page=0&size=10&status=PLAYING&status=COMPLETED`);
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=10&status=PLAYING,COMPLETED`);
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -178,7 +178,7 @@ describe('MyGameService', () => {
         expect(response).toEqual(mockResponse);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?page=1&size=20&title=zelda&platform_id=3&source_id=2&status=PLAYING&status=COMPLETED&status=ON_HOLD`);
+      const req = httpMock.expectOne(`${apiUrl}?page=1&size=20&title=zelda&platform_id=3&source_id=2&status=PLAYING,COMPLETED,ON_HOLD`);
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });

@@ -12,13 +12,12 @@ import { GameFormComponent } from '../../games/game-form/game-form.component';
 import { ToastNotificationComponent } from '../../../shared/components/toast-notification/toast-notification.component';
 
 @Component({
-  selector: 'app-my-game-form',
-  standalone: true,
+  selector: 'app-wishlist-form',
   imports: [CommonModule, FormsModule, GameFormComponent, ToastNotificationComponent],
-  templateUrl: './my-game-form.component.html',
-  styleUrls: ['./my-game-form.component.css']
+  templateUrl: './wishlist-form.component.html',
+  styleUrl: './wishlist-form.component.css'
 })
-export class MyGameFormComponent implements OnInit {
+export class WishlistFormComponent {
   private readonly gameService = inject(GameService);
   private readonly platformService = inject(PlatformService);
   private readonly sourceService = inject(SourceService);
@@ -32,7 +31,7 @@ export class MyGameFormComponent implements OnInit {
   gameId = signal<number>(0);
   platformId = signal<number>(0);
   sourceId = signal<number>(0);
-  status = signal<MyGameStatus>('NOT_PLAYED');
+  status = signal<MyGameStatus>('WISHLIST');
 
   // Dados adicionais para edição
   id = signal<number | undefined>(undefined);
@@ -62,15 +61,11 @@ export class MyGameFormComponent implements OnInit {
   newSourceName = signal<string>('');
 
   ALLOWED_ON_INIT: { value: MyGameStatus; label: string }[] = [
-    { value: 'NOT_PLAYED', label: 'não jogado' },
-    { value: 'PLAYING', label: 'jogando' },
-    { value: 'COMPLETED', label: 'completo' },
-    { value: 'ABANDONED', label: 'abandonado' },
-    { value: 'ON_HOLD', label: 'em espera' },
+    { value: 'WISHLIST', label: 'lista de desejos' }
   ];
 
   // Opções de status
-  statusOptions = MY_GAME_STATUS_OPTIONS;
+  statusOptions = this.ALLOWED_ON_INIT;
 
   constructor() {
     effect(() => {
@@ -82,7 +77,7 @@ export class MyGameFormComponent implements OnInit {
         this.gameId.set(myGameValue.game_id || myGameValue.game?.id || 0);
         this.platformId.set(myGameValue.platform_id || myGameValue.platform?.id || 0);
         this.sourceId.set(myGameValue.source_id || myGameValue.source?.id || 0);
-        this.status.set(myGameValue.status || 'NOT_PLAYED');
+        this.status.set(myGameValue.status || 'WISHLIST');
         this.isEditMode.set(true);
       }
     });

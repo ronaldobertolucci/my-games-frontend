@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
-import { WishlistComponent } from '../wishlist/wishlist.component';
-import { MyGameService } from '../../core/services/my-game.service';
-import { PlatformService } from '../../core/services/platform.service';
-import { SourceService } from '../../core/services/source.service';
-import { ConfirmService } from '../../core/services/confirm.service';
-import { MyGame, MyGameStatus } from '../../core/models/my-game.model';
-import { Platform } from '../../core/models/platform.model';
-import { Source } from '../../core/models/source.model';
-import { PaginatedResponse } from '../../core/models/paginated-response.model';
+import { WishlistComponent } from '../wishlist.component';
+import { MyGameService } from '../../../core/services/my-game.service';
+import { PlatformService } from '../../../core/services/platform.service';
+import { SourceService } from '../../../core/services/source.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { MyGame, MyGameStatus } from '../../../core/models/my-game.model';
+import { Platform } from '../../../core/models/platform.model';
+import { Source } from '../../../core/models/source.model';
+import { PaginatedResponse } from '../../../core/models/paginated-response.model';
 
 describe('WishlistComponent', () => {
   let component: WishlistComponent;
@@ -17,11 +17,6 @@ describe('WishlistComponent', () => {
   let platformService: jasmine.SpyObj<PlatformService>;
   let sourceService: jasmine.SpyObj<SourceService>;
   let confirmService: jasmine.SpyObj<ConfirmService>;
-
-  // Status permitidos (exceto WISHLIST)
-  const ALLOWED_STATUSES: MyGameStatus[] = [
-    'WISHLIST'
-  ];
 
   const mockPlatforms: Platform[] = [
     { id: 1, name: 'PC' },
@@ -76,6 +71,11 @@ describe('WishlistComponent', () => {
     first: true,
     last: true
   };
+
+  // Status permitidos (exceto WISHLIST)
+  const ALLOWED_STATUSES: MyGameStatus[] = [
+    'WISHLIST'
+  ];
 
   beforeEach(async () => {
     const myGameServiceSpy = jasmine.createSpyObj('MyGameService', [

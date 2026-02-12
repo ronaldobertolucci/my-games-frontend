@@ -243,6 +243,8 @@ export class MyGamesComponent implements OnInit {
           this.showToastMessage('Status atualizado com sucesso!', 'success');
           this.closeForm();
           this.loadMyGames();
+          this.loadPlatforms();
+          this.loadSources();
         },
         error: (error) => {
           console.error('Erro ao atualizar jogo:', error);
@@ -255,6 +257,8 @@ export class MyGamesComponent implements OnInit {
           this.showToastMessage('Jogo adicionado à coleção com sucesso!', 'success');
           this.closeForm();
           this.loadMyGames();
+          this.loadPlatforms();
+          this.loadSources();
         },
         error: (error) => {
           console.error('Erro ao adicionar jogo:', error);

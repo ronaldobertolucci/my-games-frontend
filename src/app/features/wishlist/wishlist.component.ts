@@ -8,19 +8,19 @@ import { SourceService } from '../../core/services/source.service';
 import { MyGame, MyGameStatus } from '../../core/models/my-game.model';
 import { Platform } from '../../core/models/platform.model';
 import { Source } from '../../core/models/source.model';
-import { MyGameFormComponent } from '../my-games/my-game-form/my-game-form.component';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastNotificationComponent } from '../../shared/components/toast-notification/toast-notification.component';
 import { MY_GAME_STATUS_OPTIONS } from '../../core/models/my-game.model';
+import { WishlistFormComponent } from './wishlist-form/wishlist-form.component';
 
 @Component({
-  selector: 'app-my-games',
+  selector: 'app-wishlist',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     TableListComponent,
-    MyGameFormComponent,
+    WishlistFormComponent,
     ToastNotificationComponent
   ],
   templateUrl: './wishlist.component.html',
@@ -77,11 +77,11 @@ export class WishlistComponent implements OnInit {
   myGamesData = signal<MyGame[]>([]);
   platforms = signal<Platform[]>([]);
   sources = signal<Source[]>([]);
-  
+
   searchTitle = signal<string>('');
   selectedPlatformId = signal<number>(0);
   selectedSourceId = signal<number>(0);
-  
+
   currentPage = signal<number>(0);
   totalPages = signal<number>(0);
   totalElements = signal<number>(0);
@@ -94,33 +94,33 @@ export class WishlistComponent implements OnInit {
   showToast = signal<boolean>(false);
 
   // Computed signals
-  isFilterActive = computed(() => 
-    this.searchTitle().trim().length > 0 || 
-    this.selectedPlatformId() > 0 || 
+  isFilterActive = computed(() =>
+    this.searchTitle().trim().length > 0 ||
+    this.selectedPlatformId() > 0 ||
     this.selectedSourceId() > 0
   );
 
   activeFiltersText = computed(() => {
     const filters: string[] = [];
-    
+
     if (this.searchTitle().trim()) {
       filters.push(`Título: "${this.searchTitle()}"`);
     }
-    
+
     if (this.selectedPlatformId() > 0) {
       const platform = this.platforms().find(p => p.id === this.selectedPlatformId());
       if (platform) {
         filters.push(`Plataforma: ${platform.name}`);
       }
     }
-    
+
     if (this.selectedSourceId() > 0) {
       const source = this.sources().find(s => s.id === this.selectedSourceId());
       if (source) {
         filters.push(`Loja: ${source.name}`);
       }
     }
-    
+
     return filters.join(' | ');
   });
 
@@ -159,8 +159,8 @@ export class WishlistComponent implements OnInit {
     const sourceValue = this.selectedSourceId() > 0 ? this.selectedSourceId() : undefined;
 
     this.myGameService.getMyGames(
-      this.currentPage(), 
-      this.pageSize(), 
+      this.currentPage(),
+      this.pageSize(),
       titleValue,
       platformValue,
       sourceValue,
@@ -213,17 +213,17 @@ export class WishlistComponent implements OnInit {
     const gameTitle = myGame.game?.title || 'este jogo';
     this.confirmService.confirm(
       'Confirmar Exclusão',
-      `Deseja realmente remover "${gameTitle}" da sua coleção?`
+      `Deseja realmente remover "${gameTitle}" da sua lista de desejos?`
     ).subscribe((confirmed) => {
       if (confirmed) {
         this.myGameService.deleteMyGame(myGame.id!).subscribe({
           next: () => {
-            this.showToastMessage('Jogo removido da coleção com sucesso!', 'success');
+            this.showToastMessage('Jogo removido da lista de desejos com sucesso!', 'success');
             this.loadMyGames();
           },
           error: (error) => {
             console.error('Erro ao remover jogo:', error);
-            this.showToastMessage('Erro ao remover jogo da coleção', 'error');
+            this.showToastMessage('Erro ao remover jogo da lista de desejos', 'error');
           }
         });
       }
@@ -239,6 +239,8 @@ export class WishlistComponent implements OnInit {
           this.showToastMessage('Status atualizado com sucesso!', 'success');
           this.closeForm();
           this.loadMyGames();
+          this.loadPlatforms();
+          this.loadSources();
         },
         error: (error) => {
           console.error('Erro ao atualizar jogo:', error);
@@ -248,9 +250,11 @@ export class WishlistComponent implements OnInit {
     } else {
       this.myGameService.createMyGame(myGame).subscribe({
         next: () => {
-          this.showToastMessage('Jogo adicionado à coleção com sucesso!', 'success');
+          this.showToastMessage('Jogo adicionado à lista de desejos com sucesso!', 'success');
           this.closeForm();
           this.loadMyGames();
+          this.loadPlatforms();
+          this.loadSources();
         },
         error: (error) => {
           console.error('Erro ao adicionar jogo:', error);
